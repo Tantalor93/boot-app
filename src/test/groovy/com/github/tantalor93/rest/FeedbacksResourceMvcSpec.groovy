@@ -1,26 +1,28 @@
 package com.github.tantalor93.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.tantalor93.TestConfig
 import com.github.tantalor93.dto.Feedback
 import com.github.tantalor93.dto.FeedbackToCreate
 import com.github.tantalor93.dto.Feedbacks
+import com.github.tantalor93.exception.FeedbackNotFound
 import com.github.tantalor93.service.FeedbacksService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static org.hamcrest.CoreMatchers.is
-import static org.mockito.ArgumentMatchers.eq
-import static org.mockito.Mockito.doReturn
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest
-class FeedbackResourceMvcSpec extends Specification {
+@Import(TestConfig)
+class FeedbacksResourceMvcSpec extends Specification {
 
     private static final Feedback FEEDBACK1 = new Feedback(1, "Petr", "Petr@gmail.com", "good")
     private static final Feedback FEEDBACK2 = new Feedback(2, "Ivana", "Sito@gmail.com", "bad bad")
@@ -28,7 +30,7 @@ class FeedbackResourceMvcSpec extends Specification {
     @Autowired
     MockMvc mvc
 
-    @MockBean
+    @Autowired
     FeedbacksService feedbacksService
 
     @Shared
@@ -36,14 +38,7 @@ class FeedbackResourceMvcSpec extends Specification {
 
     def "should get all feedbacks"() {
         given:
-        doReturn(
-                new Feedbacks(
-                        [
-                                FEEDBACK1,
-                                FEEDBACK2,
-                        ]
-                )
-        ).when(feedbacksService).findAll()
+        1 * feedbacksService.findAll() >> new Feedbacks([FEEDBACK1, FEEDBACK2])
 
         expect:
         mvc.perform(
@@ -63,9 +58,7 @@ class FeedbackResourceMvcSpec extends Specification {
 
     def "should get feedback by id"() {
         given:
-        doReturn(
-                FEEDBACK1
-        ).when(feedbacksService).findById(eq(1L))
+        1 * feedbacksService.findById(1L) >> FEEDBACK1
 
         expect:
         mvc.perform(
@@ -80,9 +73,7 @@ class FeedbackResourceMvcSpec extends Specification {
 
     def "should save feedback"() {
         given:
-        doReturn(
-                FEEDBACK1
-        ).when(feedbacksService).save(eq(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)))
+        1 * feedbacksService.save(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)) >> FEEDBACK1
 
         expect:
         mvc.perform(
@@ -94,6 +85,47 @@ class FeedbackResourceMvcSpec extends Specification {
                 .andExpect(jsonPath("\$.feedback.name", is(FEEDBACK1.name)))
                 .andExpect(jsonPath("\$.feedback.email", is(FEEDBACK1.email)))
                 .andExpect(jsonPath("\$.feedback.feedback", is(FEEDBACK1.feedback)))
+    }
 
+    @Unroll
+    def "should not save feedback with #tests"() {
+        expect:
+        mvc.perform(
+                MockMvcRequestBuilders.post("/feedbacks")
+                        .content(objectMapper.writeValueAsString(feedback))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest())
+
+        where:
+        feedback                                                        | tests
+        new FeedbackToCreate("", FEEDBACK1.email, FEEDBACK1.feedback)   | "empty name"
+        new FeedbackToCreate(FEEDBACK1.name, "", FEEDBACK1.feedback)    | "empty email"
+        new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, "")       | "empty feedback"
+        new FeedbackToCreate(null, FEEDBACK1.email, FEEDBACK1.feedback) | "null name"
+        new FeedbackToCreate(FEEDBACK1.name, null, FEEDBACK1.feedback)  | "null email"
+        new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, null)     | "null feedback"
+        []                                                              | "different object"
+    }
+
+    @Unroll
+    def "should not get feedback by id #tests"() {
+        expect:
+        mvc.perform(
+                MockMvcRequestBuilders.get("/feedbacks/${}", var)
+        ).andExpect(status().isBadRequest())
+
+        where:
+        var | tests
+        "a" | "non numerical ID"
+    }
+
+    def "should not get feedback by id, not found"() {
+        given:
+        feedbacksService.findById(1L) >> {throw new FeedbackNotFound()}
+
+        expect:
+        mvc.perform(
+                MockMvcRequestBuilders.get("/feedbacks/1")
+        ).andExpect(status().isNotFound())
     }
 }

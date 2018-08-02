@@ -3,6 +3,8 @@ package com.github.tantalor93.dto;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import java.util.Objects;
+
 /**
  * DTO representing feedback of user
  */
@@ -53,5 +55,22 @@ public class Feedback {
                 ", email='" + email + '\'' +
                 ", feedback='" + feedback + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Feedback feedback1 = (Feedback) o;
+        return Objects.equals(id, feedback1.id) &&
+                Objects.equals(name, feedback1.name) &&
+                Objects.equals(email, feedback1.email) &&
+                Objects.equals(feedback, feedback1.feedback);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, name, email, feedback);
     }
 }

@@ -52,6 +52,8 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>2.4.0</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
@@ -62,8 +64,13 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
             <version>1.1-groovy-2.4-rc-3</version>
+            <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId> <!-- needed by spock for mocking-->
+            <version>3.2.7</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

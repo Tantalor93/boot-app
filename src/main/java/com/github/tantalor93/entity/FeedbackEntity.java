@@ -21,6 +21,13 @@ public class FeedbackEntity {
         this.feedback = feedback;
     }
 
+    FeedbackEntity(Long id, String name, String email, String feedback) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.feedback = feedback;
+    }
+
     //for JPA
     protected FeedbackEntity() {
     }
