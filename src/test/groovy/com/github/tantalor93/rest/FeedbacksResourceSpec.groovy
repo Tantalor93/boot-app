@@ -5,12 +5,14 @@ import com.github.tantalor93.dto.FeedbackToCreate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Stepwise //run feature methods one by one top down
 class FeedbacksResourceSpec extends Specification {
