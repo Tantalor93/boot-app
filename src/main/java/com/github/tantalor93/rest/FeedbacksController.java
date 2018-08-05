@@ -21,11 +21,11 @@ import javax.validation.Valid;
  * Resource for {@link Feedback}
  */
 @RestController
-public class FeedbacksResource {
+public class FeedbacksController {
 
     private FeedbacksService feedbacksService;
 
-    public FeedbacksResource(final FeedbacksService feedbacksService) {
+    public FeedbacksController(final FeedbacksService feedbacksService) {
         this.feedbacksService = feedbacksService;
     }
 

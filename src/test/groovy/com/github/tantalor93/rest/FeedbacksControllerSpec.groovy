@@ -15,7 +15,7 @@ import spock.lang.Stepwise
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Stepwise //run feature methods one by one top down
-class FeedbacksResourceSpec extends Specification {
+class FeedbacksControllerSpec extends Specification {
 
     @Autowired
     private WebTestClient webClient

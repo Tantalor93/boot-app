@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @Import(TestConfig)
-class FeedbacksResourceMvcSpec extends Specification {
+class FeedbacksControllerMvcSpec extends Specification {
 
     private static final Feedback FEEDBACK1 = new Feedback(1, "Petr", "Petr@gmail.com", "good")
     private static final Feedback FEEDBACK2 = new Feedback(2, "Ivana", "Sito@gmail.com", "bad bad")
