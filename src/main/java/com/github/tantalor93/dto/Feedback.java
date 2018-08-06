@@ -1,15 +1,10 @@
 package com.github.tantalor93.dto;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import java.util.Objects;
 
 /**
  * DTO representing feedback of user
  */
-@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
-@JsonTypeName("feedback")
 public class Feedback {
 
     private Long id;

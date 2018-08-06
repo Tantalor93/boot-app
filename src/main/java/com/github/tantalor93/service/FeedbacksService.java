@@ -1,9 +1,10 @@
 package com.github.tantalor93.service;
 
+import com.github.tantalor93.dto.FeedbackResource;
+import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.exception.FeedbackNotFound;
 import com.github.tantalor93.dto.Feedback;
 import com.github.tantalor93.dto.FeedbackToCreate;
-import com.github.tantalor93.dto.Feedbacks;
 import com.github.tantalor93.entity.FeedbackEntity;
 import com.github.tantalor93.repository.FeedbacksRepository;
 import org.modelmapper.ModelMapper;
@@ -35,12 +36,12 @@ public class FeedbacksService {
      * persist feedback in DB and return persisted instance
      *
      * @param feedback to persist
-     * @return persisted {@link Feedback}
+     * @return instance of {@link FeedbackResource} with persisted {@link Feedback}
      */
-    public Feedback save(final FeedbackToCreate feedback) {
+    public FeedbackResource save(final FeedbackToCreate feedback) {
         final FeedbackEntity entity = modelMapper.map(feedback, FeedbackEntity.class);
         final FeedbackEntity created = feedbacksRepository.save(entity);
-        return modelMapper.map(created, Feedback.class);
+        return new FeedbackResource(modelMapper.map(created, Feedback.class));
     }
 
     /**
@@ -48,25 +49,25 @@ public class FeedbacksService {
      *
      * @return all feedbacks
      */
-    public Feedbacks findAll() {
+    public FeedbacksResource findAll() {
         final Iterable<FeedbackEntity> feedbacks = feedbacksRepository.findAll();
-        final List<Feedback> list = new LinkedList<>();
-        feedbacks.forEach(e -> list.add(modelMapper.map(e, Feedback.class)));
-        return new Feedbacks(list);
+        final List<FeedbackResource> list = new LinkedList<>();
+        feedbacks.forEach(e -> list.add(new FeedbackResource(modelMapper.map(e, Feedback.class))));
+        return new FeedbacksResource(list);
     }
 
     /**
      * find Feedback by ID
      *
      * @param id of {@link Feedback}
-     * @return {@link Feedback} instance with given ID
+     * @return {@link FeedbackResource} instance with given ID
      */
-    public Feedback findById(final Long id) {
+    public FeedbackResource findById(final Long id) {
         notNull(id, "id should not be null");
         Optional<FeedbackEntity> byId = feedbacksRepository.findById(id);
         final FeedbackEntity entity = byId.orElseThrow(
                 () -> new FeedbackNotFound("feedback with id " + id + " not found")
         );
-        return modelMapper.map(entity, Feedback.class);
+        return new FeedbackResource(modelMapper.map(entity, Feedback.class));
     }
 }

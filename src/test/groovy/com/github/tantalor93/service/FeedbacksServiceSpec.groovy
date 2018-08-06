@@ -1,9 +1,8 @@
 package com.github.tantalor93.service
 
 import com.github.tantalor93.config.ApplicationConfig
-import com.github.tantalor93.dto.Feedback
 import com.github.tantalor93.dto.FeedbackToCreate
-import com.github.tantalor93.dto.Feedbacks
+import com.github.tantalor93.dto.FeedbacksResource
 import com.github.tantalor93.entity.FeedbackEntity
 import com.github.tantalor93.exception.FeedbackNotFound
 import com.github.tantalor93.repository.FeedbacksRepository
@@ -45,9 +44,9 @@ class FeedbacksServiceSpec extends Specification {
         def saved = feedbacksService.save(toCreate)
 
         then:
-        saved.name == name
-        saved.email == email
-        saved.feedback == feedback
+        saved.feedback.name == name
+        saved.feedback.email == email
+        saved.feedback.feedback == feedback
     }
 
     def "should find all feedbacks"() {
@@ -61,18 +60,20 @@ class FeedbacksServiceSpec extends Specification {
         1 * feedbacksRepository.findAll() >> list
 
         when:
-        Feedbacks result = feedbacksService.findAll()
+        FeedbacksResource result = feedbacksService.findAll()
 
         then:
         result?.feedbacks?.size() == 2
-        result?.feedbacks[0].id == 1L
-        result?.feedbacks[0].name == "petr"
-        result?.feedbacks[0].email == "petr@gmail.com"
-        result?.feedbacks[0].feedback == "it is good"
-        result?.feedbacks[1].id == 2L
-        result?.feedbacks[1].name == "josef"
-        result?.feedbacks[1].email == "josef@gmail.com"
-        result?.feedbacks[1].feedback == "it is bad"
+
+        result?.feedbacks[0].feedback.id == 1L
+        result?.feedbacks[0].feedback.name == "petr"
+        result?.feedbacks[0].feedback.email == "petr@gmail.com"
+        result?.feedbacks[0].feedback.feedback == "it is good"
+
+        result?.feedbacks[1].feedback.id == 2L
+        result?.feedbacks[1].feedback.name == "josef"
+        result?.feedbacks[1].feedback.email == "josef@gmail.com"
+        result?.feedbacks[1].feedback.feedback == "it is bad"
     }
 
     def "should find feedback by id"() {
@@ -81,8 +82,14 @@ class FeedbacksServiceSpec extends Specification {
                 new FeedbackEntity(1L, "petr", "petr@gmail.com", "it is good")
         )
 
-        expect:
-        feedbacksService.findById(1L) == new Feedback(1L, "petr", "petr@gmail.com", "it is good")
+        when:
+        def result = feedbacksService.findById(1L)
+
+        then:
+        result.feedback.id == 1L
+        result.feedback.name == "petr"
+        result.feedback.email == "petr@gmail.com"
+        result.feedback.feedback == "it is good"
     }
 
     def "should not find feedback by id"() {

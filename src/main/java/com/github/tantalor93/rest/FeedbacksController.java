@@ -1,11 +1,12 @@
 package com.github.tantalor93.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tantalor93.dto.Feedback;
+import com.github.tantalor93.dto.FeedbackResource;
 import com.github.tantalor93.dto.FeedbackToCreate;
-import com.github.tantalor93.dto.Feedbacks;
+import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.service.FeedbacksService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,8 @@ import javax.validation.Valid;
 @RestController
 public class FeedbacksController {
 
+    private static final Logger logger = LoggerFactory.getLogger(FeedbacksController.class);
+
     private FeedbacksService feedbacksService;
 
     public FeedbacksController(final FeedbacksService feedbacksService) {
@@ -34,7 +37,7 @@ public class FeedbacksController {
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public Feedbacks getFeedbacks() {
+    public FeedbacksResource getFeedbacks() {
         return feedbacksService.findAll();
     }
 
@@ -43,8 +46,8 @@ public class FeedbacksController {
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public Feedback getFeedback(@PathVariable final Long id) {
-        return feedbacksService.findById(id);
+    public ResponseEntity<FeedbackResource> getFeedback(@PathVariable final Long id) {
+        return ResponseEntity.ok(feedbacksService.findById(id));
     }
 
     @RequestMapping(
@@ -53,7 +56,7 @@ public class FeedbacksController {
             produces = "application/json",
             consumes = "application/json"
     )
-    public ResponseEntity<Feedback> createFeedback(@Valid @RequestBody final FeedbackToCreate feedbackToCreate) {
+    public ResponseEntity<FeedbackResource> createFeedback(@Valid @RequestBody final FeedbackToCreate feedbackToCreate) {
         return new ResponseEntity<>(feedbacksService.save(feedbackToCreate), HttpStatus.CREATED);
     }
 }

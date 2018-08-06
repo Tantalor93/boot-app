@@ -1,7 +1,8 @@
 package com.github.tantalor93.rest
 
-import com.github.tantalor93.dto.Feedback
+import com.github.tantalor93.dto.FeedbackResource
 import com.github.tantalor93.dto.FeedbackToCreate
+import com.github.tantalor93.dto.FeedbacksResource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -21,11 +22,11 @@ class FeedbacksControllerSpec extends Specification {
     private WebTestClient webClient
 
     @Shared
-    Feedback feed
+    FeedbackResource resource
 
     def "should save feedback"() {
         when:
-        feed = webClient.post()
+        resource = webClient.post()
                 .uri("/feedbacks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
@@ -35,29 +36,47 @@ class FeedbacksControllerSpec extends Specification {
                 )
                 .exchange()
                     .expectStatus().isCreated()
-                    .expectBody(Feedback).returnResult().responseBody
+                    .expectBody(FeedbackResource).returnResult().responseBody
 
         then:
-        feed.id != null
-        feed.name == "petr"
-        feed.email == "petr@gmail.com"
-        feed.feedback == "is good"
+        resource.feedback.id != null
+        resource.feedback.name == "petr"
+        resource.feedback.email == "petr@gmail.com"
+        resource.feedback.feedback == "is good"
     }
 
     def "should be able to find feedback by id"() {
-        expect:
-        webClient.get()
-                .uri("/feedbacks/{id}",feed.id)
+        when:
+        def result =
+                webClient.get()
+                .uri("/feedbacks/{id}",resource.feedback.id)
                 .exchange()
                     .expectStatus().isOk()
-                    .expectBody(Feedback).isEqualTo(feed)
+                    .expectBody(FeedbackResource).returnResult().responseBody
+
+        then:
+        result.feedback.id == resource.feedback.id
+        result.feedback.name == resource.feedback.name
+        result.feedback.email == resource.feedback.email
+        result.feedback.feedback == resource.feedback.feedback
+
     }
 
     def "should be able to find feedback in feedbacks"() {
-        expect:
-        webClient.get()
+        when:
+        def result = webClient.get()
                 .uri("/feedbacks")
                 .exchange()
                     .expectStatus().isOk()
+                    .expectBody(FeedbacksResource).returnResult().responseBody
+
+        then:
+        result != null
+        result.feedbacks.size() == 1
+        result.feedbacks[0].feedback.id == resource.feedback.id
+        result.feedbacks[0].feedback.name == resource.feedback.name
+        result.feedbacks[0].feedback.email == resource.feedback.email
+        result.feedbacks[0].feedback.feedback == resource.feedback.feedback
+        !result.feedbacks[0].links.isEmpty()
     }
 }

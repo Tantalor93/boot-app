@@ -3,8 +3,9 @@ package com.github.tantalor93.rest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tantalor93.TestConfig
 import com.github.tantalor93.dto.Feedback
+import com.github.tantalor93.dto.FeedbackResource
 import com.github.tantalor93.dto.FeedbackToCreate
-import com.github.tantalor93.dto.Feedbacks
+import com.github.tantalor93.dto.FeedbacksResource
 import com.github.tantalor93.exception.FeedbackNotFound
 import com.github.tantalor93.service.FeedbacksService
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.not
+import static org.hamcrest.Matchers.empty
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest
@@ -38,7 +41,7 @@ class FeedbacksControllerMvcSpec extends Specification {
 
     def "should get all feedbacks"() {
         given:
-        1 * feedbacksService.findAll() >> new Feedbacks([FEEDBACK1, FEEDBACK2])
+        1 * feedbacksService.findAll() >> new FeedbacksResource([new FeedbackResource(FEEDBACK1), new FeedbackResource(FEEDBACK2)])
 
         expect:
         mvc.perform(
@@ -46,19 +49,23 @@ class FeedbacksControllerMvcSpec extends Specification {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("\$.feedbacks[0].feedback.id", is(FEEDBACK1.id.intValue())))
-                .andExpect(jsonPath("\$.feedbacks[0].feedback.name", is(FEEDBACK1.name)))
-                .andExpect(jsonPath("\$.feedbacks[0].feedback.email", is(FEEDBACK1.email)))
-                .andExpect(jsonPath("\$.feedbacks[0].feedback.feedback", is(FEEDBACK1.feedback)))
-                .andExpect(jsonPath("\$.feedbacks[1].feedback.id", is(FEEDBACK2.id.intValue())))
-                .andExpect(jsonPath("\$.feedbacks[1].feedback.name", is(FEEDBACK2.name)))
-                .andExpect(jsonPath("\$.feedbacks[1].feedback.email", is(FEEDBACK2.email)))
-                .andExpect(jsonPath("\$.feedbacks[1].feedback.feedback", is(FEEDBACK2.feedback)))
+                .andExpect(jsonPath("\$._embedded[0].feedback.id", is(FEEDBACK1.id.intValue())))
+                .andExpect(jsonPath("\$._embedded[0].feedback.name", is(FEEDBACK1.name)))
+                .andExpect(jsonPath("\$._embedded[0].feedback.email", is(FEEDBACK1.email)))
+                .andExpect(jsonPath("\$._embedded[0].feedback.feedback", is(FEEDBACK1.feedback)))
+                .andExpect(jsonPath("\$._embedded[0]._links", is(not(empty()))))
+                .andExpect(jsonPath("\$._embedded[0]._links.self", is(not(empty()))))
+                .andExpect(jsonPath("\$._embedded[1].feedback.id", is(FEEDBACK2.id.intValue())))
+                .andExpect(jsonPath("\$._embedded[1].feedback.name", is(FEEDBACK2.name)))
+                .andExpect(jsonPath("\$._embedded[1].feedback.email", is(FEEDBACK2.email)))
+                .andExpect(jsonPath("\$._embedded[1].feedback.feedback", is(FEEDBACK2.feedback)))
+                .andExpect(jsonPath("\$._embedded[1]._links", is(not(empty()))))
+                .andExpect(jsonPath("\$._embedded[1]._links.self", is(not(empty()))))
     }
 
     def "should get feedback by id"() {
         given:
-        1 * feedbacksService.findById(1L) >> FEEDBACK1
+        1 * feedbacksService.findById(1L) >> new FeedbackResource(FEEDBACK1)
 
         expect:
         mvc.perform(
@@ -68,23 +75,27 @@ class FeedbacksControllerMvcSpec extends Specification {
                 .andExpect(jsonPath("\$.feedback.name", is(FEEDBACK1.name)))
                 .andExpect(jsonPath("\$.feedback.email", is(FEEDBACK1.email)))
                 .andExpect(jsonPath("\$.feedback.feedback", is(FEEDBACK1.feedback)))
+                .andExpect(jsonPath("\$._links", is(not(empty()))))
+                .andExpect(jsonPath("\$._links.self", is(not(empty()))))
 
     }
 
     def "should save feedback"() {
         given:
-        1 * feedbacksService.save(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)) >> FEEDBACK1
+        1 * feedbacksService.save(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)) >> new FeedbackResource(FEEDBACK1)
 
         expect:
         mvc.perform(
                 MockMvcRequestBuilders.post("/feedbacks")
-                        .content(objectMapper.writeValueAsString(FEEDBACK1))
+                        .content(objectMapper.writeValueAsString(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated())
                 .andExpect(jsonPath("\$.feedback.id", is(FEEDBACK1.id.intValue())))
                 .andExpect(jsonPath("\$.feedback.name", is(FEEDBACK1.name)))
                 .andExpect(jsonPath("\$.feedback.email", is(FEEDBACK1.email)))
                 .andExpect(jsonPath("\$.feedback.feedback", is(FEEDBACK1.feedback)))
+                .andExpect(jsonPath("\$._links", is(not(empty()))))
+                .andExpect(jsonPath("\$._links.self", is(not(empty()))))
     }
 
     @Unroll
