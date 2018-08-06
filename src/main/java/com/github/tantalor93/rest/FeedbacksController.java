@@ -5,8 +5,6 @@ import com.github.tantalor93.dto.FeedbackResource;
 import com.github.tantalor93.dto.FeedbackToCreate;
 import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.service.FeedbacksService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,8 +21,6 @@ import javax.validation.Valid;
  */
 @RestController
 public class FeedbacksController {
-
-    private static final Logger logger = LoggerFactory.getLogger(FeedbacksController.class);
 
     private FeedbacksService feedbacksService;
 
