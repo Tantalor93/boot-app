@@ -10,6 +10,7 @@ import com.github.tantalor93.repository.FeedbacksRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import static org.apache.commons.lang3.Validate.notNull;
  * Service for {@link Feedback}
  */
 @Service
+@Transactional
 public class FeedbacksService {
 
     private final FeedbacksRepository feedbacksRepository;

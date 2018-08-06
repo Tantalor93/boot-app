@@ -90,6 +90,7 @@ class FeedbacksControllerMvcSpec extends Specification {
                         .content(objectMapper.writeValueAsString(new FeedbackToCreate(FEEDBACK1.name, FEEDBACK1.email, FEEDBACK1.feedback)))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated())
+        .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("\$.feedback.id", is(FEEDBACK1.id.intValue())))
                 .andExpect(jsonPath("\$.feedback.name", is(FEEDBACK1.name)))
                 .andExpect(jsonPath("\$.feedback.email", is(FEEDBACK1.email)))

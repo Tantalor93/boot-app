@@ -7,13 +7,13 @@ import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.service.FeedbacksService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 
@@ -57,6 +57,12 @@ public class FeedbacksController {
             consumes = "application/json"
     )
     public ResponseEntity<FeedbackResource> createFeedback(@Valid @RequestBody final FeedbackToCreate feedbackToCreate) {
-        return new ResponseEntity<>(feedbacksService.save(feedbackToCreate), HttpStatus.CREATED);
+        final FeedbackResource saved = feedbacksService.save(feedbackToCreate);
+        return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(saved.getFeedback().getId())
+                        .toUri()
+        ).body(saved);
     }
 }
