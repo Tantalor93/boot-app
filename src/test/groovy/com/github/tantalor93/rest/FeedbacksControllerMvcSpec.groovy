@@ -48,7 +48,7 @@ class FeedbacksControllerMvcSpec extends Specification {
                 MockMvcRequestBuilders.get("/feedbacks")
         )
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType("application/hal+json;charset=UTF-8"))
                 .andExpect(jsonPath("\$._embedded[0].feedback.id", is(FEEDBACK1.id.intValue())))
                 .andExpect(jsonPath("\$._embedded[0].feedback.name", is(FEEDBACK1.name)))
                 .andExpect(jsonPath("\$._embedded[0].feedback.email", is(FEEDBACK1.email)))

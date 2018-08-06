@@ -5,6 +5,7 @@ import com.github.tantalor93.dto.FeedbackResource;
 import com.github.tantalor93.dto.FeedbackToCreate;
 import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.service.FeedbacksService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,8 +31,7 @@ public class FeedbacksController {
 
     @RequestMapping(
             value = "/feedbacks",
-            method = RequestMethod.GET,
-            produces = "application/json"
+            method = RequestMethod.GET
     )
     public FeedbacksResource getFeedbacks() {
         return feedbacksService.findAll();
@@ -39,8 +39,7 @@ public class FeedbacksController {
 
     @RequestMapping(
             value = "/feedbacks/{id}",
-            method = RequestMethod.GET,
-            produces = "application/json"
+            method = RequestMethod.GET
     )
     public ResponseEntity<FeedbackResource> getFeedback(@PathVariable final Long id) {
         return ResponseEntity.ok(feedbacksService.findById(id));
@@ -49,8 +48,7 @@ public class FeedbacksController {
     @RequestMapping(
             value = "/feedbacks",
             method = RequestMethod.POST,
-            produces = "application/json",
-            consumes = "application/json"
+            consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<FeedbackResource> createFeedback(@Valid @RequestBody final FeedbackToCreate feedbackToCreate) {
         final FeedbackResource saved = feedbacksService.save(feedbackToCreate);
