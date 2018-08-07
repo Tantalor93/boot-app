@@ -9,6 +9,9 @@ import com.github.tantalor93.repository.FeedbacksRepository
 import org.modelmapper.ModelMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.Subject
@@ -44,26 +47,29 @@ class FeedbacksServiceSpec extends Specification {
         def saved = feedbacksService.save(toCreate)
 
         then:
-        saved.feedback.name == name
-        saved.feedback.email == email
-        saved.feedback.feedback == feedback
+        saved?.feedback?.name == name
+        saved?.feedback?.email == email
+        saved?.feedback?.feedback == feedback
     }
 
     def "should find all feedbacks"() {
         given:
-        def list = [
+        def list = new PageImpl([
                 new FeedbackEntity(1, "petr", "petr@gmail.com", "it is good"),
                 new FeedbackEntity(2, "josef", "josef@gmail.com", "it is bad")
-        ]
+        ])
 
         and:
-        1 * feedbacksRepository.findAll() >> list
+        1 * feedbacksRepository.findAll(_ as Pageable) >> list
 
         when:
-        FeedbacksResource result = feedbacksService.findAll()
+        FeedbacksResource result = feedbacksService.findAll(PageRequest.of(0, 10))
 
         then:
         result?.feedbacks?.size() == 2
+
+        result?.totalElements == 2
+        result?.totalPages == 1
 
         result?.feedbacks[0].feedback.id == 1L
         result?.feedbacks[0].feedback.name == "petr"
@@ -86,10 +92,10 @@ class FeedbacksServiceSpec extends Specification {
         def result = feedbacksService.findById(1L)
 
         then:
-        result.feedback.id == 1L
-        result.feedback.name == "petr"
-        result.feedback.email == "petr@gmail.com"
-        result.feedback.feedback == "it is good"
+        result?.feedback?.id == 1L
+        result?.feedback?.name == "petr"
+        result?.feedback?.email == "petr@gmail.com"
+        result?.feedback?.feedback == "it is good"
     }
 
     def "should not find feedback by id"() {

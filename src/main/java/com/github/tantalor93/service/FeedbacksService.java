@@ -10,6 +10,8 @@ import com.github.tantalor93.repository.FeedbacksRepository;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -58,12 +60,12 @@ public class FeedbacksService {
      *
      * @return all feedbacks
      */
-    public FeedbacksResource findAll() {
+    public FeedbacksResource findAll(final Pageable pageable) {
         logger.info("action=find_all_feedbacks status=start");
-        final Iterable<FeedbackEntity> feedbacks = feedbacksRepository.findAll();
+        final Page<FeedbackEntity> feedbacks = feedbacksRepository.findAll(pageable);
         final List<FeedbackResource> list = new LinkedList<>();
         feedbacks.forEach(e -> list.add(new FeedbackResource(modelMapper.map(e, Feedback.class))));
-        final FeedbacksResource feedbacksResource = new FeedbacksResource(list);
+        final FeedbacksResource feedbacksResource = new FeedbacksResource(list, feedbacks, pageable);
         logger.info("action=find_all_feedbacks status=finished found={}", list.size());
         return feedbacksResource;
     }

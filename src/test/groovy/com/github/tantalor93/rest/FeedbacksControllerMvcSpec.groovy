@@ -11,6 +11,9 @@ import com.github.tantalor93.service.FeedbacksService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -41,11 +44,14 @@ class FeedbacksControllerMvcSpec extends Specification {
 
     def "should get all feedbacks"() {
         given:
-        1 * feedbacksService.findAll() >> new FeedbacksResource([new FeedbackResource(FEEDBACK1), new FeedbackResource(FEEDBACK2)])
+        1 * feedbacksService.findAll(_ as Pageable) >> new FeedbacksResource(
+                [new FeedbackResource(FEEDBACK1), new FeedbackResource(FEEDBACK2)],
+                new PageImpl(Arrays.asList(new FeedbackResource(FEEDBACK1), new FeedbackResource(FEEDBACK2))),
+                new PageRequest(0, 10))
 
         expect:
         mvc.perform(
-                MockMvcRequestBuilders.get("/feedbacks")
+                MockMvcRequestBuilders.get("/feedbacks?size=10")
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/hal+json;charset=UTF-8"))

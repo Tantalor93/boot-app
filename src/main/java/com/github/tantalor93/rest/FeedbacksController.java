@@ -5,6 +5,7 @@ import com.github.tantalor93.dto.FeedbackResource;
 import com.github.tantalor93.dto.FeedbackToCreate;
 import com.github.tantalor93.dto.FeedbacksResource;
 import com.github.tantalor93.service.FeedbacksService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +34,9 @@ public class FeedbacksController {
             value = "/feedbacks",
             method = RequestMethod.GET
     )
-    public FeedbacksResource getFeedbacks() {
-        return feedbacksService.findAll();
+    public FeedbacksResource getFeedbacks(final Pageable pageable) {
+        FeedbacksResource all = feedbacksService.findAll(pageable);
+        return all;
     }
 
     @RequestMapping(
