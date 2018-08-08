@@ -7,6 +7,7 @@ import com.github.tantalor93.entity.FeedbackEntity
 import com.github.tantalor93.exception.FeedbackNotFound
 import com.github.tantalor93.repository.FeedbacksRepository
 import org.modelmapper.ModelMapper
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageImpl
@@ -22,6 +23,8 @@ class FeedbacksServiceSpec extends Specification {
 
     def feedbacksRepository = Mock(FeedbacksRepository)
 
+    def rabbitTemplate = Mock(RabbitTemplate)
+
     @Autowired
     ModelMapper modelMapper
 
@@ -29,7 +32,7 @@ class FeedbacksServiceSpec extends Specification {
     FeedbacksService feedbacksService
 
     def setup() {
-        feedbacksService = new FeedbacksService(feedbacksRepository, modelMapper)
+        feedbacksService = new FeedbacksService(feedbacksRepository, rabbitTemplate, modelMapper)
     }
 
 

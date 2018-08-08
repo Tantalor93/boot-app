@@ -1,5 +1,6 @@
 package com.github.tantalor93.service;
 
+import com.github.tantalor93.config.RabbitConfig;
 import com.github.tantalor93.dto.Feedback;
 import com.github.tantalor93.dto.FeedbackResource;
 import com.github.tantalor93.dto.FeedbackToCreate;
@@ -10,6 +11,7 @@ import com.github.tantalor93.repository.FeedbacksRepository;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,11 +34,15 @@ public class FeedbacksService {
 
     private final FeedbacksRepository feedbacksRepository;
 
+    private final RabbitTemplate rabbitTemplate;
+
     private final ModelMapper modelMapper;
 
     public FeedbacksService(final FeedbacksRepository feedbacksRepository,
+                            final RabbitTemplate rabbitTemplate,
                             final ModelMapper modelMapper) {
         this.feedbacksRepository = feedbacksRepository;
+        this.rabbitTemplate = rabbitTemplate;
         this.modelMapper = modelMapper;
     }
 
@@ -50,7 +56,9 @@ public class FeedbacksService {
         logger.info("action=save_feedback status=start feedback={}", feedback);
         final FeedbackEntity entity = modelMapper.map(feedback, FeedbackEntity.class);
         final FeedbackEntity created = feedbacksRepository.save(entity);
-        final FeedbackResource feedbackResource = new FeedbackResource(modelMapper.map(created, Feedback.class));
+        final Feedback mapped = modelMapper.map(created, Feedback.class);
+        rabbitTemplate.convertAndSend(RabbitConfig.TOPIC_EXCHANGE_NAME, "feedback." + mapped.getId(), mapped);
+        final FeedbackResource feedbackResource = new FeedbackResource(mapped);
         logger.info("action=save_feedback status=finished id={}", created.getId());
         return feedbackResource;
     }

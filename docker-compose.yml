@@ -7,9 +7,16 @@ services:
       - "8080:8080"
     links:
       - postgres
+      - rabbit
   postgres:
     container_name: postgres-server
     image: postgres
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=mydb
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
